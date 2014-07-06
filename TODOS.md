@@ -6,5 +6,5 @@
 - [ ] enhance accessability
 - [x] set up a release-task in Grunt
 - [x] create xtag.json-file
-- [ ] publish to Bower
-- [ ] Add installation guide to README
+- [x] publish to Bower
+- [x] Add installation guide to README

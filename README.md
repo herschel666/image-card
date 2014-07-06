@@ -5,6 +5,28 @@ Image Card is a Custom Element for displaying a slideshow powered by [Mozilla X-
 
 ![image](http://i60.tinypic.com/140i1pc.jpg)
 
+## Installation
+
+Installation is simply done by using Bower:
+
+```bash
+$ bower install image-card --save
+```
+
+After that include the X-Tag-Core-library, the element's Javascript and the element's CSS into your page. That's it!
+
+```html
+…
+<head>
+  <link rel="stylesheet" href="bower_components/image-card/dist/styles/image-card.css">
+  <script src="bower_components/x-tag-core/dist/x-tag-core.js"></script>
+  <script src="bower_components/image-card/dist/scripts/image-card.js"></script>
+</head>
+<body>
+  <!-- throw in some Image Cards! -->
+  …
+```
+
 ## Usage
 
 Just wrap a bunch of images into the `<image-card>`-element:
