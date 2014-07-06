@@ -1,7 +1,0 @@
-- [ ] build decent a demo-page
-- [ ] remove the nasty double-bullet-amount-bug
-- [ ] enable dragging
-- [ ] enhance accessability
-- [ ] set up a release-task in Grunt
-- [ ] create xtag.json-file
-- [ ] publish to Bower

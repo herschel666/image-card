@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image-Card-Demo</title>
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/image-card.css">
+  <script src="./scripts/x-tag-core.min.js"></script>
+  <script src="./scripts/image-card.js"></script>
+</head>
+<body>
+  <h1>&lt;Image-Card&gt;</h1>
+  <p>A Web Component for an Image Card. Use arrow-keys or bullet-controls to view images.</p>
+  <iframe src="http://ghbtns.com/github-btn.html?user=herschel666&amp;repo=image-card&amp;type=fork" allowtransparency="true" frameborder="0" scrolling="0" width="62" height="20"></iframe>
+  <iframe src="http://ghbtns.com/github-btn.html?user=herschel666&amp;repo=image-card&amp;type=star" allowtransparency="true" frameborder="0" scrolling="0" width="62" height="20"></iframe>
+  <h2>Image Card with controls</h2>
+  <image-card>
+    <img src="./images/kitten.jpg" alt="">
+    <img src="./images/murray.jpg" alt="">
+    <img src="./images/city.jpg" alt="">
+    <img src="./images/kitten.jpg" alt="">
+    <card-control></card-control>
+  </image-card>
+  <h2>Image Card with controls and different, initial image</h2>
+  <image-card current="3">
+    <img src="./images/kitten.jpg" alt="">
+    <img src="./images/murray.jpg" alt="">
+    <img src="./images/city.jpg" alt="">
+    <card-control></card-control>
+  </image-card>
+  <h2>Image Card without controls</h2>
+  <image-card>
+    <img src="./images/murray.jpg" alt="">
+    <img src="./images/city.jpg" alt="">
+  </image-card>
+  <footer>
+    &copy; 2014 &mdash; by <a href="http://herschel666.github.io">Emanuel Kluge</a> (<a href="https://twitter.com/Herschel_R">@Herschel_R</a>)
+  </footer>
+</body>
+</html>
