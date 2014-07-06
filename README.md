@@ -1,7 +1,7 @@
 Image-Card
 ====
 
-Image Card is a Web Component for displaying a slideshow powered by [Mozilla X-Tag](http://x-tags.org/). It is controllable by keyboard (with left- and rights-arrows on focus) and with the additional `<card-control>`-element.
+Image Card is a Custom Element for displaying a slideshow powered by [Mozilla X-Tag](http://x-tags.org/). It is controllable by keyboard (with left- and rights-arrows on focus) and with the additional `<card-control>`-element.
 
 ![image](http://i60.tinypic.com/140i1pc.jpg)
 

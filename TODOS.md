@@ -1,6 +1,8 @@
 - [ ] build decent a demo-page
 - [ ] remove the nasty double-bullet-amount-bug
 - [ ] enable dragging
+- [ ] integrate type-switch for control (bullets|arrows)
+- [ ] set arbitrary, fix max-width for `<image-card>`
 - [ ] enhance accessability
 - [ ] set up a release-task in Grunt
 - [ ] create xtag.json-file
