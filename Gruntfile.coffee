@@ -29,6 +29,10 @@ module.exports = (grunt) ->
     karma:
       unit:
         configFile: './karma.conf.js'
+      single:
+        options:
+          singleRun: true
+        configFile: './karma.conf.js'
 
     concat:
       options:
@@ -57,4 +61,4 @@ module.exports = (grunt) ->
         files:
           'dist/styles/<%= pkg.name %>.min.css': 'dist/styles/<%= pkg.name %>.css'
 
-  grunt.registerTask 'default', ['clean', 'concat', 'uglify', 'copy', 'cssmin']
+  grunt.registerTask 'default', ['karma:single', 'clean', 'concat', 'uglify', 'copy', 'cssmin']

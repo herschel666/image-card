@@ -1,7 +1,7 @@
 /**
  * image-card - 0.1.0
  *
- * A Web Component for an Image Card
+ * A Custom Element for an Image Card
  *
  * http://www.emanuel-kluge.de/
  *
@@ -54,7 +54,6 @@ function setDimensions() {
   var natWidth = this.images[this.current - 1].naturalWidth,
       natHeight = this.images[this.current - 1].naturalHeight;
 
-  this.style.maxWidth = natWidth + 'px';
   this.querySelector('.wrapper').style.paddingBottom = (natHeight/natWidth * 100) + '%';
 
   // setting the slider to the correct position
