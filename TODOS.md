@@ -5,6 +5,6 @@
 - [x] set arbitrary, fix max-width for `<image-card>`
 - [ ] enhance accessability
 - [x] set up a release-task in Grunt
-- [ ] create xtag.json-file
+- [x] create xtag.json-file
 - [ ] publish to Bower
 - [ ] Add installation guide to README

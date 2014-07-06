@@ -1,0 +1,26 @@
+{
+  "name": "Image-Card",
+  "tagName": "image-card",
+  "version": "0.1.0",
+  "author": "Emanuel Kluge",
+  "description": "A Custom Element for an Image Card.",
+  "images": [],
+  "categories": [],
+  "demo": "demo/index.html",
+  "xtag": "0.9.7",
+  "documentation": {
+    "attributes": {
+      "current": "The currently display image (start counting by 1)."
+    },
+    "events": {
+      "change": "The displayed image changed."
+    },
+    "methods": {
+      "prev": "Displaying the previous image.",
+      "next": "Displaying the next image."
+    },
+    "getters": {
+      "images": "DOM-list of the contained images."
+    }
+  }
+}
