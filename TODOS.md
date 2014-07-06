@@ -4,6 +4,6 @@
 - [ ] integrate type-switch for control (bullets|arrows)
 - [ ] set arbitrary, fix max-width for `<image-card>`
 - [ ] enhance accessability
-- [ ] set up a release-task in Grunt
+- [x] set up a release-task in Grunt
 - [ ] create xtag.json-file
 - [ ] publish to Bower

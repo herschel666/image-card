@@ -4,8 +4,11 @@
   "authors": [
     "Emanuel Kluge"
   ],
-  "description": "A Web Component for an Image Card",
-  "main": "src/image-card.js",
+  "description": "A Custom Element for an Image Card",
+  "main": [
+    "dist/scripts/image-card.js",
+    "dist/styles/image-card.css"
+  ],
   "keywords": [
     "custom",
     "element",
@@ -27,6 +30,5 @@
   ],
   "dependencies": {
     "x-tag-core": "~0.9.7"
-  },
-  "devDependencies": {}
+  }
 }
