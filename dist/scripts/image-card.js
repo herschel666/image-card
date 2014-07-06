@@ -118,6 +118,15 @@ imageCardObj.lifecycle.created = function icCreated() {
 
 };
 
+/**
+ * Changing image and firing `change`-event
+ * when the `current`-attribute changes.
+ * 
+ * @param  {string} name Name of the relevant attribute
+ * @param  {string} prev Previous value of the attribute
+ * @param  {string} cur  Current value of the attribute
+ * @return {undefined}
+ */
 imageCardObj.lifecycle.attributeChanged = function attributeChanged(name, prev, cur) {
   if ( name === 'current' ) {
     cycle.call(this, cur);
@@ -268,8 +277,7 @@ function onClick(evnt) {
 cardControlObj.lifecycle.created = function ccCreated() {
 
   var parent = getImageCard.call(this),
-      that,
-      btn;
+      btns;
 
   if ( !parent ) {
     return;
@@ -277,15 +285,11 @@ cardControlObj.lifecycle.created = function ccCreated() {
 
   this.__parent = parent;
   parent.setAttribute('data-card-control', true);
-  that = this;
-  btn = document.createElement('button');
-  btn.type = 'btn';
-  btn.className = 'btn';
+  btns = '';
   each(parent.images, function (img, i) {
-    var b = btn.cloneNode(true);
-    b.setAttribute('data-index', i + 1);
-    that.appendChild(b);
+    btns += '<button type="button" class="btn" data-index="' + (i + 1) + '">' + (i + 1) + '</button>';
   });
+  this.innerHTML = btns;
   xtag.addEvent(parent, 'change', onChange.bind(this));
   xtag.addEvent(this, 'click:delegate(button)', onClick.bind(this));
 

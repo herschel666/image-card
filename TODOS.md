@@ -1,5 +1,5 @@
 - [ ] build decent a demo-page
-- [ ] remove the nasty double-bullet-amount-bug
+- [x] remove the nasty double-bullet-amount-bug
 - [ ] enable dragging
 - [ ] integrate type-switch for control (bullets|arrows)
 - [x] set arbitrary, fix max-width for `<image-card>`
@@ -7,3 +7,4 @@
 - [x] set up a release-task in Grunt
 - [ ] create xtag.json-file
 - [ ] publish to Bower
+- [ ] Add installation guide to README
