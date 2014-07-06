@@ -3,4 +3,5 @@
 - [ ] enable dragging
 - [ ] enhance accessability
 - [ ] set up a release-task in Grunt
+- [ ] create xtag.json-file
 - [ ] publish to Bower
