@@ -1,7 +1,7 @@
 - [ ] build decent demo-page with code-examples and api-doc
 - [x] remove the nasty double-bullet-amount-bug
 - [ ] enable dragging
-- [ ] --integrate type-switch for control (bullets|arrows)--
+- [ ] ~~integrate type-switch for control (bullets|arrows)~~
 - [x] set arbitrary, fix max-width for `<image-card>`
 - [x] enhance accessability
 - [ ] js-api documentation
