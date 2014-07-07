@@ -1,6 +1,6 @@
 describe('image-card', function () {
 
-  var elem;
+  var elem, elem2;
 
   beforeEach(function () {
     var frag = xtag.createFragment('<image-card current="2">\
@@ -8,12 +8,20 @@ describe('image-card', function () {
       <img src="images/murray.jpg" alt="">\
       <img src="images/city.jpg" alt="">\
     </image-card>');
+    var frag2 = xtag.createFragment('<image-card>\
+      <img src="images/kitten.jpg" alt="">\
+      <img src="images/murray.jpg" alt="">\
+      <card-control></card-control>\
+    </image-card>');
     elem = frag.childNodes[0];
+    elem2 = frag2.childNodes[0];
     document.body.appendChild(elem);
+    document.body.appendChild(elem2);
   });
 
   afterEach(function () {
     elem.remove();
+    elem2.remove();
   });
 
   describe('basics', function () {
@@ -22,12 +30,17 @@ describe('image-card', function () {
       expect(ImageCard).toBeDefined();
     });
 
+    it('should have an ID', function () {
+      expect(elem.__id).toContain('ic-');
+    });
+
     it('should be a valid element', function () {
       expect(toString.call(elem)).toBe('[object HTMLElement]');
     });
 
-    it('should have a tabindex', function () {
+    it('should have the correct tabindex', function () {
       expect(elem.tabIndex).toBe(0);
+      expect(elem2.tabIndex).toBe(-1);
     });
 
     it('should have the inner elements', function () {
@@ -36,8 +49,14 @@ describe('image-card', function () {
       expect(elem.querySelectorAll('.slider').length).toBe(1);
     });
 
-    it('should have the role-attribute', function () {
+    it('should have the role- and aria-attributes', function () {
       expect(elem.getAttribute('role')).toBe('application');
+      expect(elem.getAttribute('aria-multiselectable')).toBe('false');
+    });
+
+    it('should have card-control-attribute if card-control is inserted', function () {
+      expect(elem.hasAttribute('data-card-control')).toBe(false);
+      expect(elem2.hasAttribute('data-card-control')).toBe(true);
     });
 
   });
@@ -56,11 +75,24 @@ describe('image-card', function () {
       expect(elem.images[0].getAttribute('aria-hidden')).toBe('true');
       expect(elem.images[1].getAttribute('aria-hidden')).toBe('false');
       expect(elem.images[2].getAttribute('aria-hidden')).toBe('true');
+      expect(elem.images[0].hasAttribute('aria-labeledby')).toBe(false);
+      expect(elem.images[1].hasAttribute('aria-labeledby')).toBe(false);
+      expect(elem.images[2].hasAttribute('aria-labeledby')).toBe(false);
+      expect(elem2.images[0].getAttribute('aria-labeledby')).toBe('btn-' + elem2.__id + '-1');
+      expect(elem2.images[1].getAttribute('aria-labeledby')).toBe('btn-' + elem2.__id + '-2');
     });
-    it('should have the role-attribute', function () {
+    it('should have the role-attribute and ID', function () {
       expect(elem.images[0].getAttribute('role')).toBe('tabpanel');
       expect(elem.images[1].getAttribute('role')).toBe('tabpanel');
       expect(elem.images[2].getAttribute('role')).toBe('tabpanel');
+      expect(elem.images[0].id).toBe('img-' + elem.__id + '-1');
+      expect(elem.images[1].id).toBe('img-' + elem.__id + '-2');
+      expect(elem.images[2].id).toBe('img-' + elem.__id + '-3');
+    });
+    it('should have the correct tabindex', function () {
+      expect(elem.images[0].tabIndex).toBe(-1);
+      expect(elem.images[1].tabIndex).toBe(-1);
+      expect(elem.images[2].tabIndex).toBe(-1);
     });
   });
 

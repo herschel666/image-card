@@ -1,5 +1,15 @@
 
 var each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
+var uid = 0;
+
+/**
+ * Generates an auto-incrementing UID.
+ * 
+ * @return {number}
+ */
+function getUid() {
+  return ++uid;
+}
 
 /**
  * The ImageCard's "body".
@@ -61,6 +71,11 @@ function wrapImages() {
     img = imgs[0].cloneNode(true);
     img.setAttribute('aria-hidden', i === ~~this.current ? 'false' : 'true');
     img.setAttribute('role', 'tabpanel');
+    img.tabIndex = -1;
+    img.id = 'img-' + this.__id + '-' + i;
+    if ( this.hasAttribute('data-card-control') ) {
+      img.setAttribute('aria-labeledby', 'btn-' + this.__id + '-' + i);
+    }
     slider.appendChild(img);
     imgs[0].remove();
     i += 1;
@@ -79,7 +94,13 @@ function wrapImages() {
  */
 function cycle(cur) {
 
-  var offset = cur * this.offsetWidth;
+  var offset;
+
+  if ( !this.__slider ) {
+    return;
+  }
+
+  offset = cur * this.offsetWidth;
 
   this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
   this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
@@ -107,18 +128,22 @@ function resetAriaHidden(cur) {
  */
 imageCardObj.lifecycle.created = function icCreated() {
 
+  // set the ID (not as an attribute!)
+  this.__id = 'ic-' + getUid();
+
   // set default current-value
   if ( !this.current ) {
     this.current = this.current || 1;
   }
 
-  // set tabindex to enable focussing
-  if ( this.tabIndex === -1 ) {
-    this.tabIndex = 0;
-  }
-
-  // set the role-attribute
+  // set the role- and aria-attributes
   this.setAttribute('role', 'application');
+  this.setAttribute('aria-multiselectable', 'false');
+
+  // check if card-control is inserted
+  if ( this.querySelector('card-control') ) {
+    this.setAttribute('data-card-control', true);
+  }
 
   // wrap images  
   xtag.innerHTML(this, wrapImages.call(this) + this.innerHTML);
@@ -130,6 +155,17 @@ imageCardObj.lifecycle.created = function icCreated() {
   if ( this.images[this.current - 1] ) {
     this.images[this.current - 1].onload = setDimensions.bind(this);
   }
+
+  // keyboard-bindings if no card-control exists
+  if ( !this.hasAttribute('data-card-control') ) {
+    xtag.addEvents(this, {
+      'keyup:keypass(37, 38)': this.prev.bind(this),
+      'keyup:keypass(39, 40)': this.next.bind(this)
+    });
+  }
+
+  // set tabindex to enable focussing if no card-control exists
+  this.tabIndex = this.hasAttribute('data-card-control') ? -1 : 0;
 
 };
 
@@ -174,26 +210,6 @@ imageCardObj.accessors.current = {
   attribute: {
     name: 'current'
   }
-};
-
-/**
- * Binding events for arrow-left-key
- * 
- * @return undefined
- */
-imageCardObj.events['keyup:keypass(37, 38)'] = function (evnt) {
-  evnt.preventDefault();
-  this.prev();
-};
-
-/**
- * Binding events for arrow-right-key
- * 
- * @return undefined
- */
-imageCardObj.events['keyup:keypass(39, 40)'] = function (evnt) {
-  evnt.preventDefault();
-  this.next();
 };
 
 /**
@@ -244,7 +260,8 @@ window.ImageCard = xtag.register('image-card', imageCardObj);
  */
 var cardControlObj = Object.create({
   lifecycle: Object.create(null),
-  accessors: Object.create(null)
+  accessors: Object.create(null),
+  events: Object.create(null)
 });
 
 /**
@@ -270,10 +287,12 @@ function getImageCard() {
  * @return undefined
  */
 function onChange(evnt) {
-  each(this.buttons, function (btn) {
+  var cur = evnt.detail.current - 1;
+  each(this.buttons, function (btn, i) {
     btn.classList.remove('current');
+    btn.tabIndex = i === cur ? 0 : -1;
   });
-  this.buttons[evnt.detail.current - 1].classList.add('current');
+  this.buttons[cur].classList.add('current');
 }
 
 /**
@@ -302,12 +321,17 @@ cardControlObj.lifecycle.created = function ccCreated() {
   }
 
   this.__parent = parent;
-  parent.setAttribute('data-card-control', true);
   btns = '';
   each(parent.images, function (img, i) {
-    btns += '<button type="button" class="btn" data-index="' + (i + 1) + '">' + (i + 1) + '</button>';
+    var j = i + 1;
+    btns += '<button type="button" class="btn" tabindex="' + (j === ~~parent.current ? '0' : '-1') + '"'
+     + ' role="tab"'
+     + ' aria-controls="img-' + parent.__id + '-' + j + '"'
+     + ' id="btn-' + parent.__id + '-' + j + '"'
+     + ' data-index="' + j + '">' + j + '</button>';
   });
   this.innerHTML = btns;
+  this.setAttribute('role', 'tablist');
   xtag.addEvent(parent, 'change', onChange.bind(this));
   xtag.addEvent(this, 'click:delegate(button)', onClick.bind(this));
 
@@ -322,6 +346,26 @@ cardControlObj.accessors.buttons = {
   get: function getButtons() {
     return this.getElementsByTagName('button');
   }
+};
+
+/**
+ * Binding event for left- and down-arrow (previous image).
+ * 
+ * @return {undefined}
+ */
+cardControlObj.events['keyup:keypass(37, 38)'] = function (evnt) {
+  this.__parent.prev();
+  this.buttons[this.__parent.current - 1].focus();
+};
+
+/**
+ * Binding event for right- and up-arrow (next image).
+ * 
+ * @return {undefined}
+ */
+cardControlObj.events['keyup:keypass(39, 40)'] = function () {
+  this.__parent.next();
+  this.buttons[this.__parent.current - 1].focus();
 };
 
 /**
