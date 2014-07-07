@@ -1,7 +1,7 @@
 {
   "name": "Image-Card",
   "tagName": "image-card",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Emanuel Kluge",
   "description": "A Custom Element for an Image Card.",
   "images": [],

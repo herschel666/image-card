@@ -51,6 +51,9 @@ module.exports = (grunt) ->
 
     copy:
       styles:
+        options:
+          process: (content) ->
+            (grunt.config.get 'banner') + content
         files:
           'dist/styles/<%= pkg.name %>.css': 'src/<%= pkg.name %>.css'
 

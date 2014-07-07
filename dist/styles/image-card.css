@@ -1,3 +1,13 @@
+/**
+ * image-card - 0.2.0
+ *
+ * A Custom Element for an Image Card
+ *
+ * http://www.emanuel-kluge.de/
+ *
+ * Copyright (c) 2014 Emanuel Kluge;
+ * Licensed MIT
+ */
 
 image-card {
   max-width: 300px;
