@@ -1,9 +1,10 @@
-- [ ] build decent a demo-page
+- [ ] build decent demo-page with code-examples and api-doc
 - [x] remove the nasty double-bullet-amount-bug
 - [ ] enable dragging
 - [ ] integrate type-switch for control (bullets|arrows)
 - [x] set arbitrary, fix max-width for `<image-card>`
-- [ ] enhance accessability
+- [ ] enhance accessability (role="tabpanel")
+- [ ] js-api documentation
 - [x] set up a release-task in Grunt
 - [x] create xtag.json-file
 - [x] publish to Bower
