@@ -14,23 +14,6 @@ var imageCardObj = Object.create({
 });
 
 /**
- * Changes the current visible image by the given
- * index (starting with 1!)
- * 
- * @param  {string|number} cur Index of the image
- * @return undefined
- */
-function cycle(cur) {
-
-  var offset = (cur - 1) * this.offsetWidth;
-
-  this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
-
-}
-
-/**
  * Setting the dimensions of the image-card
  * by referencing the natural width and height
  * of the current image.
@@ -44,7 +27,7 @@ function setDimensions() {
 
   // setting the slider to the correct position
   if ( this.current > 1 ) {
-    cycle.call(this, this.current);
+    cycle.call(this, this.current - 1);
     xtag.fireEvent(this, 'change', {
       detail: {
         current: this.current
@@ -55,13 +38,13 @@ function setDimensions() {
 }
 
 /**
- * `created`-callback
+ * Creates a wrapper and transfers the images
+ * into it. Sets `aria-hidden`-attributes.
  * 
- * @return undefined
+ * @return {string} The wrapper-HTML
  */
-imageCardObj.lifecycle.created = function icCreated() {
+function wrapImages() {
 
-  // wrap images
   var frag = xtag.createFragment('<div> \
     <div class="wrapper"> \
       <div class="wrapper-inner"> \
@@ -69,20 +52,60 @@ imageCardObj.lifecycle.created = function icCreated() {
       </div> \
     </div> \
   </div>');
-  var slider = frag.querySelector('.slider');
+  var slider = frag.querySelector('.slider'),
+      imgs = this.images,
+      i = 1,
+      img;
 
-  each(this.images, function (img) {
-    slider.appendChild(img.cloneNode(true));
-  });
-  each(this.childNodes, function (elem) {
-    if ( elem.nodeName === 'IMG' ) {
-      elem.remove();
-    }
-  });
-  xtag.innerHTML(this, frag.childNodes[0].innerHTML + this.innerHTML);
+  while ( imgs.length ) {
+    img = imgs[0].cloneNode(true);
+    img.setAttribute('aria-hidden', i === ~~this.current ? 'false' : 'true');
+    img.setAttribute('role', 'tabpanel');
+    slider.appendChild(img);
+    imgs[0].remove();
+    i += 1;
+  }
 
-  // setting reference to the slider
-  this.__slider = this.querySelector('.slider');
+  return frag.childNodes[0].innerHTML;
+
+}
+
+/**
+ * Changes the current visible image by the given
+ * index (starting with 1!)
+ * 
+ * @param  {string|number} cur Index of the image
+ * @return undefined
+ */
+function cycle(cur) {
+
+  var offset = cur * this.offsetWidth;
+
+  this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+  this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+  this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
+
+}
+
+/**
+ * Resets the `aria-hidden`-attribute by the
+ * index of the current image.
+ * 
+ * @param  {number}    cur Index of the current image
+ * @return {undefined}
+ */
+function resetAriaHidden(cur) {
+  each(this.images, function (img, i) {
+    img.setAttribute('aria-hidden', i === cur ? 'false' : 'true');
+  });
+}
+
+/**
+ * `created`-callback
+ * 
+ * @return undefined
+ */
+imageCardObj.lifecycle.created = function icCreated() {
 
   // set default current-value
   if ( !this.current ) {
@@ -95,7 +118,13 @@ imageCardObj.lifecycle.created = function icCreated() {
   }
 
   // set the role-attribute
-  this.setAttribute('role', 'listbox');
+  this.setAttribute('role', 'application');
+
+  // wrap images  
+  xtag.innerHTML(this, wrapImages.call(this) + this.innerHTML);
+
+  // setting reference to the slider
+  this.__slider = this.querySelector('.slider');
 
   // compute dimensions referencing the current image
   if ( this.images[this.current - 1] ) {
@@ -115,7 +144,8 @@ imageCardObj.lifecycle.created = function icCreated() {
  */
 imageCardObj.lifecycle.attributeChanged = function attributeChanged(name, prev, cur) {
   if ( name === 'current' ) {
-    cycle.call(this, cur);
+    cycle.call(this, cur - 1);
+    resetAriaHidden.call(this, cur - 1);
     xtag.fireEvent(this, 'change', {
       detail: {
         current: cur
@@ -151,7 +181,8 @@ imageCardObj.accessors.current = {
  * 
  * @return undefined
  */
-imageCardObj.events['keyup:keypass(37)'] = function () {
+imageCardObj.events['keyup:keypass(37, 38)'] = function (evnt) {
+  evnt.preventDefault();
   this.prev();
 };
 
@@ -160,7 +191,8 @@ imageCardObj.events['keyup:keypass(37)'] = function () {
  * 
  * @return undefined
  */
-imageCardObj.events['keyup:keypass(39)'] = function () {
+imageCardObj.events['keyup:keypass(39, 40)'] = function (evnt) {
+  evnt.preventDefault();
   this.next();
 };
 

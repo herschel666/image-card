@@ -37,7 +37,7 @@ describe('image-card', function () {
     });
 
     it('should have the role-attribute', function () {
-      expect(elem.getAttribute('role')).toBe('listbox');
+      expect(elem.getAttribute('role')).toBe('application');
     });
 
   });
@@ -51,6 +51,16 @@ describe('image-card', function () {
     it('should be read-only', function () {
       elem.images = 'foo';
       expect(elem.images).not.toBe('foo');
+    });
+    it('should have correct aria-attributes', function () {
+      expect(elem.images[0].getAttribute('aria-hidden')).toBe('true');
+      expect(elem.images[1].getAttribute('aria-hidden')).toBe('false');
+      expect(elem.images[2].getAttribute('aria-hidden')).toBe('true');
+    });
+    it('should have the role-attribute', function () {
+      expect(elem.images[0].getAttribute('role')).toBe('tabpanel');
+      expect(elem.images[1].getAttribute('role')).toBe('tabpanel');
+      expect(elem.images[2].getAttribute('role')).toBe('tabpanel');
     });
   });
 
@@ -88,10 +98,15 @@ describe('image-card', function () {
     it('should trigger cycling', function () {
       spyOn(window, 'cycle');
       elem.prev();
-      expect(cycle).toHaveBeenCalledWith('1');
+      expect(cycle).toHaveBeenCalledWith(0);
     });
     it('should have a fluent interface', function () {
       expect(elem.prev() instanceof ImageCard).toBe(true);
+    });
+    it('should reset the aria-hidden-attributes', function () {
+      elem.prev();
+      expect(elem.images[0].getAttribute('aria-hidden')).toBe('false');
+      expect(elem.images[1].getAttribute('aria-hidden')).toBe('true');
     });
   });
 
@@ -108,10 +123,15 @@ describe('image-card', function () {
     it('should trigger cycling', function () {
       spyOn(window, 'cycle');
       elem.next();
-      expect(cycle).toHaveBeenCalledWith('3');
+      expect(cycle).toHaveBeenCalledWith(2);
     });
     it('should have a fluent interface', function () {
       expect(elem.next() instanceof ImageCard).toBe(true);
+    });
+    it('should reset the aria-hidden-attributes', function () {
+      elem.next();
+      expect(elem.images[1].getAttribute('aria-hidden')).toBe('true');
+      expect(elem.images[2].getAttribute('aria-hidden')).toBe('false');
     });
   });
 
