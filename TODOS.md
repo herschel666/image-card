@@ -6,6 +6,7 @@
 - [x] set arbitrary, fix max-width for `<image-card>`
 - [x] enhance accessability
 - [ ] js-api documentation
+- [ ] set up `controls` as attribute rather than as an element itself
 - [x] set up a release-task in Grunt
 - [x] create xtag.json-file
 - [x] publish to Bower
