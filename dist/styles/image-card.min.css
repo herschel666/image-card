@@ -1,5 +1,5 @@
 /**
- * image-card - 0.3.0
+ * image-card - 0.3.1
  *
  * A Custom Element for an Image Card
  *

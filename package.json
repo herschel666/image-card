@@ -1,6 +1,6 @@
 {
   "name": "image-card",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A Custom Element for an Image Card",
   "keywords": [
     "web",
