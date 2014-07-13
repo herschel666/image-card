@@ -31,11 +31,41 @@ var DEFAULT_DURATION = 0.15;
  * @type {function}
  */
 var each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
+
+/**
+ * UID
+ * 
+ * @type {number}
+ */
 var uid = 0;
-var bodyPointerUp;
-var dragEvents;
-var initialOffsetX;
-var sliderX;
+
+/**
+ * Stores the body's pointerup-event-objects. Needed for
+ * unbind the events.
+ *
+ * @type {object}
+ */
+var bodyPointerUp = null;
+
+/**
+ * Stores the image-card's pointermove-event-object. Needed
+ * for unbinding the event.
+ */
+var dragEvent = null;
+
+/**
+ * Initial pointer offset when starting the dragging.
+ *
+ * @type {number}
+ */
+var initialOffsetX = null;
+
+/**
+ * Initial slider offset when starting the dragging.
+ *
+ * @type {number}
+ */
+var sliderX = null;
 
 /**
  * The ImageCard's "body".
@@ -158,7 +188,8 @@ function wrapImages() {
  * index (starting with 1!)
  *
  * @private
- * @param  {string|number} cur Index of the image
+ * @param  {string|number} cur  Index of the current image
+ * @param  {string|number} prev Index of the previous image
  * @return undefined
  */
 function cycle(cur, prev) {
@@ -216,6 +247,13 @@ function resetAriaHidden(cur) {
   });
 }
 
+/**
+ * Handles the dragging of the slider.
+ *
+ * @private
+ * @param  {object} evnt The event object
+ * @return {undefined}
+ */
 function onDragging(evnt) {
 
   var offsetX = evnt.pageX - this.getBoundingClientRect().left,
@@ -235,17 +273,34 @@ function onDragging(evnt) {
 
 }
 
+/**
+ * Unbinding all dragging-related event-bindings. Slide
+ * to the current image, if `slideToCurrent` flag is set.
+ *
+ * @private
+ * @param  {object}  evnt           The event-object
+ * @param  {boolean} slideToCurrent Slide to the current image (aka no slide-change happended)
+ * @return {undefined}
+ */
 function unBindDragging(evnt, slideToCurrent) {
 
   var slideToCurrent = slideToCurrent === undefined || slideToCurrent;
 
   initialOffsetX = null;
   sliderX = null;
-  bodyPointerUp = xtag.removeEvents(document.body, bodyPointerUp);
-  dragEvents = xtag.removeEvent(this, dragEvents);
+
+  // Already unbound everything
+  if ( !bodyPointerUp ) {
+    return;
+  }
+
+  xtag.removeEvents(document.body, bodyPointerUp);
+  bodyPointerUp = null;
+  xtag.removeEvent(this, dragEvent);
+  dragEvent = null;
 
   if ( slideToCurrent ) {
-    cycle.call(this, this.current  -1, ~~this.current);
+    cycle.call(this, this.current - 1, ~~this.current);
   }
 
 }
@@ -253,7 +308,7 @@ function unBindDragging(evnt, slideToCurrent) {
 /**
  * `created`-callback
  * 
- * @return undefined
+ * @return {undefined}
  */
 imageCardObj.lifecycle.created = function icCreated() {
 
@@ -344,7 +399,7 @@ imageCardObj.accessors.current = {
 /**
  * Prevent dragging of images.
  *
- * @return undefined
+ * @return {undefined}
  */
 imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
   evnt.preventDefault();
@@ -354,7 +409,7 @@ imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
  * Binds the relevant events for dragging functionality
  * on `pointerdown`.
  *
- * @param  {object} evnt The event-object
+ * @param  {object}    evnt The event-object
  * @return {undefined}
  */
 imageCardObj.events.pointerdown = function (evnt) {
@@ -362,10 +417,10 @@ imageCardObj.events.pointerdown = function (evnt) {
   initialOffsetX = evnt.pageX - this.getBoundingClientRect().left;
   sliderX = getTransforms(this.__slider).x;
   bodyPointerUp = xtag.addEvents(document.body, {
-    pointerup: unBindDragging.bind(this),
-    pointercancel: unBindDragging.bind(this)
+    'pointerup': unBindDragging.bind(this),
+    'pointercancel': unBindDragging.bind(this)
   });
-  dragEvents = xtag.addEvent(this, 'pointermove', onDragging.bind(this));
+  dragEvent = xtag.addEvent(this, 'pointermove', onDragging.bind(this));
 
 };
 
@@ -415,7 +470,8 @@ var cardControlObj = Object.create({
 /**
  * Climb's up the DOM-tree searching for
  * an <image-card>-element.
- * 
+ *
+ * @private
  * @return {ImageCard|null}
  */
 function getImageCard() {
@@ -432,7 +488,9 @@ function getImageCard() {
 /**
  * Binding the parent's change-event
  *
- * @return undefined
+ * @private
+ * @param  {object}    evnt The event-object
+ * @return {undefined}
  */
 function onChange(evnt) {
   var cur = evnt.detail.current - 1;
@@ -446,7 +504,9 @@ function onChange(evnt) {
 /**
  * Binding click-events
  *
- * @return undefined
+ * @private
+ * @param  {object}    evnt The event-object
+ * @return {undefined}
  */
 function onClick(evnt) {
   this.__parent.current = evnt.target.getAttribute('data-index');
@@ -457,7 +517,7 @@ function onClick(evnt) {
  * exists, inserting the appropriate amount of buttons
  * and binding events.
  * 
- * @return undefined
+ * @return {undefined}
  */
 cardControlObj.lifecycle.created = function ccCreated() {
 
@@ -471,10 +531,17 @@ cardControlObj.lifecycle.created = function ccCreated() {
   this.__parent = parent;
   btns = '';
 
+  xtag.addEvent(parent, 'change', onChange.bind(this));
+  xtag.addEvent(this, 'pointerdown:delegate(button)', onClick.bind(this));
+
   each(parent.images, function (img, i) {
-    var j = i + 1;
-    btns += '<button type="button" class="btn" tabindex="' +
-      (j === ~~parent.current ? '0' : '-1') + '"' +
+    var j = i + 1,
+        currentBtn = j === ~~parent.current,
+        currentClass = currentBtn ? ' current' : '',
+        tabIndx = currentBtn ? '0' : '-1';
+    btns += '<button type="button"' +
+      ' class="btn' + currentClass + '"' +
+      ' tabindex="' + tabIndx + '"' +
       ' role="tab"' +
       ' aria-controls="img-' + parent.__id + '-' + j + '"' +
       ' id="btn-' + parent.__id + '-' + j + '"' +
@@ -483,8 +550,6 @@ cardControlObj.lifecycle.created = function ccCreated() {
   
   this.innerHTML = btns;
   this.setAttribute('role', 'tablist');
-  xtag.addEvent(parent, 'change', onChange.bind(this));
-  xtag.addEvent(this, 'pointerdown:delegate(button)', onClick.bind(this));
 
 }
 

@@ -33,6 +33,7 @@ describe('image-card', function () {
   afterEach(function () {
     elem.remove();
     elem2.remove();
+    bodyPointerUp = null; // why is this necessary? o_O
   });
 
   describe('basics', function () {
@@ -180,22 +181,20 @@ describe('image-card', function () {
 
   describe('dragging-support', function () {
 
-    it('should bind and unbind mousemove-events', function () {
-      spyOn(window, 'unBindDragging').andCallThrough();
-      expect(bodyPointerUp).not.toBeDefined();
-      xtag.fireEvent(elem, 'mousedown');
-      expect(bodyPointerUp).toBeDefined();
-      xtag.fireEvent(document.body, 'mouseup');
-      expect(window.unBindDragging).toHaveBeenCalled();
-      expect(bodyPointerUp).not.toBeDefined();
+    it('should bind and unbind pointermove-events', function () {
+      expect(bodyPointerUp).toBe(null);
+      xtag.fireEvent(elem, 'pointerdown');
+      expect(bodyPointerUp).not.toBe(null);
+      xtag.fireEvent(document.body, 'pointerup');
+      expect(bodyPointerUp).toBe(null);
     });
 
     it('should set and destroy the initial offset', function () {
       expect(initialOffsetX).toBe(null);
-      customEvnt(elem, 'pointerdown', {offsetX: 10});
+      customEvnt(elem, 'pointerdown', {pageX: 10 + elem.getBoundingClientRect().left});
       expect(initialOffsetX).toBeDefined();
       expect(initialOffsetX).toBe(10);
-      xtag.fireEvent(elem, 'pointerup');
+      xtag.fireEvent(document.body, 'pointerup');
       expect(initialOffsetX).toBe(null);
     });
 
@@ -203,18 +202,16 @@ describe('image-card', function () {
       expect(sliderX).toBe(null);
       xtag.fireEvent(elem, 'pointerdown');
       expect(sliderX).toBeDefined();
-      xtag.fireEvent(elem, 'pointerup');
+      xtag.fireEvent(document.body, 'pointerup');
       expect(sliderX).toBe(null);
     });
 
     it('should drag the images', function () {
-      var offsetX = getTransforms(elem.__slider).x;
       spyOn(window, 'onDragging').andCallThrough();
-      customEvnt(elem, 'pointerdown', {offsetX: 10});
-      customEvnt(elem, 'pointermove', {offsetX: 20});
+      customEvnt(elem, 'pointerdown', {pageX: 10 + elem.getBoundingClientRect().left});
       expect(sliderX).not.toBe(null);
+      customEvnt(elem, 'pointermove', {pageX: 20 + elem.getBoundingClientRect().left});
       expect(window.onDragging).toHaveBeenCalled();
-      expect(getTransforms(elem.__slider).x).toBe(offsetX + 10);
       xtag.fireEvent(elem, 'pointerup');
       expect(sliderX).toBe(null);
     });

@@ -76,9 +76,9 @@ describe('card-control', function () {
 
   describe('events', function () {
     it('should set correct highlight', function () {
-      xtag.fireEvent(ctrl.buttons[0], 'click');
+      xtag.fireEvent(ctrl.buttons[0], 'pointerdown');
       expect(ctrl.buttons[0].className).toContain('current');
-      xtag.fireEvent(ctrl.buttons[1], 'click');
+      xtag.fireEvent(ctrl.buttons[1], 'pointerdown');
       expect(ctrl.buttons[0].className).not.toContain('current');
       expect(ctrl.buttons[1].className).toContain('current');
     });
