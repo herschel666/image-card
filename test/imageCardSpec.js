@@ -2,6 +2,17 @@ describe('image-card', function () {
 
   var elem, elem2;
 
+  function customEvnt(elem, type, props) {
+    var evnt = new Event(type),
+        j;
+    for ( j in (props || {}) ) {
+      if ( hasOwnProperty.call(props, j) ) {
+        evnt[j] = props[j];
+      }
+    }
+    elem.dispatchEvent(evnt);
+  }
+
   beforeEach(function () {
     var frag = xtag.createFragment('<image-card current="2">\
       <img src="images/kitten.jpg" alt="">\
@@ -130,7 +141,7 @@ describe('image-card', function () {
     it('should trigger cycling', function () {
       spyOn(window, 'cycle');
       elem.prev();
-      expect(cycle).toHaveBeenCalledWith(0);
+      expect(cycle).toHaveBeenCalledWith(0, 1);
     });
     it('should have a fluent interface', function () {
       expect(elem.prev() instanceof ImageCard).toBe(true);
@@ -155,7 +166,7 @@ describe('image-card', function () {
     it('should trigger cycling', function () {
       spyOn(window, 'cycle');
       elem.next();
-      expect(cycle).toHaveBeenCalledWith(2);
+      expect(cycle).toHaveBeenCalledWith(2, 1);
     });
     it('should have a fluent interface', function () {
       expect(elem.next() instanceof ImageCard).toBe(true);
@@ -165,6 +176,49 @@ describe('image-card', function () {
       expect(elem.images[1].getAttribute('aria-hidden')).toBe('true');
       expect(elem.images[2].getAttribute('aria-hidden')).toBe('false');
     });
+  });
+
+  describe('dragging-support', function () {
+
+    it('should bind and unbind mousemove-events', function () {
+      spyOn(window, 'unBindDragging').andCallThrough();
+      expect(bodyPointerUp).not.toBeDefined();
+      xtag.fireEvent(elem, 'mousedown');
+      expect(bodyPointerUp).toBeDefined();
+      xtag.fireEvent(document.body, 'mouseup');
+      expect(window.unBindDragging).toHaveBeenCalled();
+      expect(bodyPointerUp).not.toBeDefined();
+    });
+
+    it('should set and destroy the initial offset', function () {
+      expect(initialOffsetX).toBe(null);
+      customEvnt(elem, 'pointerdown', {offsetX: 10});
+      expect(initialOffsetX).toBeDefined();
+      expect(initialOffsetX).toBe(10);
+      xtag.fireEvent(elem, 'pointerup');
+      expect(initialOffsetX).toBe(null);
+    });
+
+    it('should set and destroy the sliderX', function () {
+      expect(sliderX).toBe(null);
+      xtag.fireEvent(elem, 'pointerdown');
+      expect(sliderX).toBeDefined();
+      xtag.fireEvent(elem, 'pointerup');
+      expect(sliderX).toBe(null);
+    });
+
+    it('should drag the images', function () {
+      var offsetX = getTransforms(elem.__slider).x;
+      spyOn(window, 'onDragging').andCallThrough();
+      customEvnt(elem, 'pointerdown', {offsetX: 10});
+      customEvnt(elem, 'pointermove', {offsetX: 20});
+      expect(sliderX).not.toBe(null);
+      expect(window.onDragging).toHaveBeenCalled();
+      expect(getTransforms(elem.__slider).x).toBe(offsetX + 10);
+      xtag.fireEvent(elem, 'pointerup');
+      expect(sliderX).toBe(null);
+    });
+
   });
 
 });

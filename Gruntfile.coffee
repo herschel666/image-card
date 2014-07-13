@@ -36,7 +36,7 @@ module.exports = (grunt) ->
 
     concat:
       options:
-        banner: '<%= banner %>\r\n\r\n(function (window, xtag) {\r\n\r\n'
+        banner: '<%= banner %>\r\n\r\n(function (window, xtag, undefined) {\r\n\r\n'
         footer: '\r\n\r\n})(window, xtag);'
       all:
         src: ['src/<%= pkg.name %>.js']

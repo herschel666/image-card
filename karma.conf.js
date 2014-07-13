@@ -15,6 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'bower_components/pointerevents-polyfill/pointerevents.min.js',
       'bower_components/x-tag-core/dist/x-tag-core.js',
       'src/**/*.js',
       'test/**/*Spec.js'
