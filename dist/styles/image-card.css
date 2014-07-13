@@ -1,9 +1,12 @@
 /**
- * image-card - 0.2.0
+ * image-card - 0.3.0
  *
  * A Custom Element for an Image Card
  *
  * http://www.emanuel-kluge.de/
+ *
+ * @element image-card
+ * @demo http://herschel666.github.io/image-card/
  *
  * Copyright (c) 2014 Emanuel Kluge;
  * Licensed MIT
@@ -45,9 +48,6 @@ image-card .slider {
   -webkit-transition-property: -webkit-transform;
   -moz-transition-property: -moz-transform;
   transition-property: transform;
-  -webkit-transition-duration: .11s;
-  -moz-transition-duration: .11s;
-  transition-duration: .11s;
   -webkit-transition-timing-function: linear;
   -moz-transition-timing-function: linear;
   transition-timing-function: linear;

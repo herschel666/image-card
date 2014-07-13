@@ -1,33 +1,93 @@
 /**
- * image-card - 0.2.0
+ * image-card - 0.3.0
  *
  * A Custom Element for an Image Card
  *
  * http://www.emanuel-kluge.de/
+ *
+ * @element image-card
+ * @demo http://herschel666.github.io/image-card/
  *
  * Copyright (c) 2014 Emanuel Kluge;
  * Licensed MIT
  */
 
 
-(function (window, xtag) {
+(function (window, xtag, undefined) {
 
 
+/**
+ * Transitionend-event name
+ *
+ * @const
+ * @type {string}
+ */
+var TRANSITION_END = (function () {
+  var trans = document.createElement('div').style.webkitTransition;
+  return trans != undefined ? 'webkitTransitionEnd' : 'transitionend';
+})();
+
+/**
+ * Drag-distance amount triggering a slidechange.
+ *
+ * @const
+ * @type {number}
+ */
+var DRAG_TRIGGER_AMOUNT = 0.4;
+
+/**
+ * Default slidechange-duration
+ * 
+ * @type {number}
+ */
+var DEFAULT_DURATION = 0.15;
+
+/**
+ * `Array.each`-shortcut
+ * 
+ * @type {function}
+ */
 var each = Array.prototype.forEach.call.bind(Array.prototype.forEach);
+
+/**
+ * UID
+ * 
+ * @type {number}
+ */
 var uid = 0;
 
 /**
- * Generates an auto-incrementing UID.
- * 
- * @return {number}
+ * Stores the body's pointerup-event-objects. Needed for
+ * unbind the events.
+ *
+ * @type {object}
  */
-function getUid() {
-  return ++uid;
-}
+var bodyPointerUp = null;
+
+/**
+ * Stores the image-card's pointermove-event-object. Needed
+ * for unbinding the event.
+ */
+var dragEvent = null;
+
+/**
+ * Initial pointer offset when starting the dragging.
+ *
+ * @type {number}
+ */
+var initialOffsetX = null;
+
+/**
+ * Initial slider offset when starting the dragging.
+ *
+ * @type {number}
+ */
+var sliderX = null;
 
 /**
  * The ImageCard's "body".
- * 
+ *
+ * @private
  * @type {object}
  */
 var imageCardObj = Object.create({
@@ -38,9 +98,49 @@ var imageCardObj = Object.create({
 });
 
 /**
+ * Generates an auto-incrementing UID.
+ *
+ * @private
+ * @return {number}
+ */
+function getUid() {
+  return ++uid;
+}
+
+/**
+ * Takes a DOM element and determines the CSS
+ * transform values (x, y).
+ *
+ * @private
+ * @param  {HTMLElement} elem
+ * @return {object}
+ */
+function getTransforms(elem) {
+
+  var styles = getComputedStyle(elem),
+      transformMatrix = styles.webkitTransform || styles.mozTransform || styles.transform,
+      result = {x: 0, y: 0},
+      arr;
+
+  try {
+    arr = /^matrix\(([^)]+)\)$/gi.exec(transformMatrix)[1].split(/\s?,\s?/);
+  } catch (e) {
+    return result;
+  }
+
+  result.x = parseInt(arr[4], 10);
+  result.y = parseInt(arr[5], 10);
+
+  return result;
+
+}
+
+/**
  * Setting the dimensions of the image-card
  * by referencing the natural width and height
  * of the current image.
+ *
+ * @private
  */
 function setDimensions() {
 
@@ -64,18 +164,19 @@ function setDimensions() {
 /**
  * Creates a wrapper and transfers the images
  * into it. Sets `aria-hidden`-attributes.
- * 
+ *
+ * @private
  * @return {string} The wrapper-HTML
  */
 function wrapImages() {
 
-  var frag = xtag.createFragment('<div> \
-    <div class="wrapper"> \
-      <div class="wrapper-inner"> \
-        <div class="slider"></div> \
-      </div> \
-    </div> \
-  </div>');
+  var frag = xtag.createFragment('<div>' +
+    '<div class="wrapper">' +
+      '<div class="wrapper-inner">' +
+        '<div class="slider"></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>');
   var slider = frag.querySelector('.slider'),
       imgs = this.images,
       i = 1,
@@ -102,30 +203,58 @@ function wrapImages() {
 /**
  * Changes the current visible image by the given
  * index (starting with 1!)
- * 
- * @param  {string|number} cur Index of the image
+ *
+ * @private
+ * @param  {string|number} cur  Index of the current image
+ * @param  {string|number} prev Index of the previous image
  * @return undefined
  */
-function cycle(cur) {
+function cycle(cur, prev) {
 
-  var offset;
+  var prev = prev || 0,
+      offset,
+      duration;
 
   if ( !this.__slider ) {
     return;
   }
 
   offset = cur * this.offsetWidth;
+  duration = Math.abs(cur - prev) * DEFAULT_DURATION;
 
+  setSliderOffset.call(this, offset, duration);
+
+}
+
+/**
+ * Sets the slider offset as CSS transforms, applies
+ * the given duration-value as CSS-transition-duration.
+ *
+ * @private
+ * @param {number} offset   The slider offset as px-value
+ * @param {number} duration The slide-animation's duration in seconds
+ * @return {undefined}
+ */
+function setSliderOffset(offset, duration) {
+  var duration = duration || DEFAULT_DURATION;
+  this.__slider.style.webkitTransitionDuration = duration + 's';
+  this.__slider.style.mozTransitionDuration = duration + 's';
+  this.__slider.style.transitionDuration = duration + 's';
   this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
   this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
   this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
-
+  this.__slider.addEventListener(TRANSITION_END, function () {
+    this.__slider.style.webkitTransitionDuration = DEFAULT_DURATION + 's';
+    this.__slider.style.mozTransitionDuration = DEFAULT_DURATION + 's';
+    this.__slider.style.transitionDuration = DEFAULT_DURATION + 's';
+  }.bind(this), false);
 }
 
 /**
  * Resets the `aria-hidden`-attribute by the
  * index of the current image.
- * 
+ *
+ * @private
  * @param  {number}    cur Index of the current image
  * @return {undefined}
  */
@@ -136,9 +265,67 @@ function resetAriaHidden(cur) {
 }
 
 /**
+ * Handles the dragging of the slider.
+ *
+ * @private
+ * @param  {object} evnt The event object
+ * @return {undefined}
+ */
+function onDragging(evnt) {
+
+  var offsetX = evnt.pageX - this.getBoundingClientRect().left,
+      deltaX = Math.round(sliderX - (offsetX - initialOffsetX) * -1.3),
+      direction = deltaX <= sliderX ? 'next' : 'prev',
+      triggerSlideChange = Math.abs(deltaX - sliderX) > (this.offsetWidth * DRAG_TRIGGER_AMOUNT);
+
+  if ( triggerSlideChange ) {
+    this[direction]();
+    unBindDragging.call(this, false);
+    return;
+  }
+
+  this.__slider.style.webkitTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
+  this.__slider.style.mozTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
+  this.__slider.style.transform = 'translateX(' + deltaX + 'px) translateZ(0)';
+
+}
+
+/**
+ * Unbinding all dragging-related event-bindings. Slide
+ * to the current image, if `slideToCurrent` flag is set.
+ *
+ * @private
+ * @param  {object}  evnt           The event-object
+ * @param  {boolean} slideToCurrent Slide to the current image (aka no slide-change happended)
+ * @return {undefined}
+ */
+function unBindDragging(evnt, slideToCurrent) {
+
+  var slideToCurrent = slideToCurrent === undefined || slideToCurrent;
+
+  initialOffsetX = null;
+  sliderX = null;
+
+  // Already unbound everything
+  if ( !bodyPointerUp ) {
+    return;
+  }
+
+  xtag.removeEvents(document.body, bodyPointerUp);
+  bodyPointerUp = null;
+  xtag.removeEvent(this, dragEvent);
+  dragEvent = null;
+
+  if ( slideToCurrent ) {
+    cycle.call(this, this.current - 1, ~~this.current);
+  }
+
+}
+
+/**
  * `created`-callback
  * 
- * @return undefined
+ * @return {undefined}
  */
 imageCardObj.lifecycle.created = function icCreated() {
 
@@ -194,7 +381,7 @@ imageCardObj.lifecycle.created = function icCreated() {
  */
 imageCardObj.lifecycle.attributeChanged = function attributeChanged(name, prev, cur) {
   if ( name === 'current' ) {
-    cycle.call(this, cur - 1);
+    cycle.call(this, cur - 1, prev - 1);
     resetAriaHidden.call(this, cur - 1);
     xtag.fireEvent(this, 'change', {
       detail: {
@@ -229,10 +416,29 @@ imageCardObj.accessors.current = {
 /**
  * Prevent dragging of images.
  *
- * @return undefined
+ * @return {undefined}
  */
 imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
   evnt.preventDefault();
+};
+
+/**
+ * Binds the relevant events for dragging functionality
+ * on `pointerdown`.
+ *
+ * @param  {object}    evnt The event-object
+ * @return {undefined}
+ */
+imageCardObj.events.pointerdown = function (evnt) {
+
+  initialOffsetX = evnt.pageX - this.getBoundingClientRect().left;
+  sliderX = getTransforms(this.__slider).x;
+  bodyPointerUp = xtag.addEvents(document.body, {
+    'pointerup': unBindDragging.bind(this),
+    'pointercancel': unBindDragging.bind(this)
+  });
+  dragEvent = xtag.addEvent(this, 'pointermove', onDragging.bind(this));
+
 };
 
 /**
@@ -281,7 +487,8 @@ var cardControlObj = Object.create({
 /**
  * Climb's up the DOM-tree searching for
  * an <image-card>-element.
- * 
+ *
+ * @private
  * @return {ImageCard|null}
  */
 function getImageCard() {
@@ -298,7 +505,9 @@ function getImageCard() {
 /**
  * Binding the parent's change-event
  *
- * @return undefined
+ * @private
+ * @param  {object}    evnt The event-object
+ * @return {undefined}
  */
 function onChange(evnt) {
   var cur = evnt.detail.current - 1;
@@ -312,7 +521,9 @@ function onChange(evnt) {
 /**
  * Binding click-events
  *
- * @return undefined
+ * @private
+ * @param  {object}    evnt The event-object
+ * @return {undefined}
  */
 function onClick(evnt) {
   this.__parent.current = evnt.target.getAttribute('data-index');
@@ -323,31 +534,39 @@ function onClick(evnt) {
  * exists, inserting the appropriate amount of buttons
  * and binding events.
  * 
- * @return undefined
+ * @return {undefined}
  */
 cardControlObj.lifecycle.created = function ccCreated() {
 
   var parent = getImageCard.call(this),
       btns;
 
-  if ( !parent ) {
+  if ( !parent || !parent.__id ) {
     return;
   }
 
   this.__parent = parent;
   btns = '';
+
+  xtag.addEvent(parent, 'change', onChange.bind(this));
+  xtag.addEvent(this, 'pointerdown:delegate(button)', onClick.bind(this));
+
   each(parent.images, function (img, i) {
-    var j = i + 1;
-    btns += '<button type="button" class="btn" tabindex="' + (j === ~~parent.current ? '0' : '-1') + '"'
-     + ' role="tab"'
-     + ' aria-controls="img-' + parent.__id + '-' + j + '"'
-     + ' id="btn-' + parent.__id + '-' + j + '"'
-     + ' data-index="' + j + '">' + j + '</button>';
+    var j = i + 1,
+        currentBtn = j === ~~parent.current,
+        currentClass = currentBtn ? ' current' : '',
+        tabIndx = currentBtn ? '0' : '-1';
+    btns += '<button type="button"' +
+      ' class="btn' + currentClass + '"' +
+      ' tabindex="' + tabIndx + '"' +
+      ' role="tab"' +
+      ' aria-controls="img-' + parent.__id + '-' + j + '"' +
+      ' id="btn-' + parent.__id + '-' + j + '"' +
+      ' data-index="' + j + '">' + j + '</button>';
   });
+  
   this.innerHTML = btns;
   this.setAttribute('role', 'tablist');
-  xtag.addEvent(parent, 'change', onChange.bind(this));
-  xtag.addEvent(this, 'click:delegate(button)', onClick.bind(this));
 
 }
 
