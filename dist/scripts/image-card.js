@@ -1,5 +1,5 @@
 /**
- * image-card - 0.3.1
+ * image-card - 0.3.2
  *
  * A Custom Element for an Image Card
  *
@@ -272,22 +272,24 @@ function resetAriaHidden(cur) {
  * @return {undefined}
  */
 function onDragging(evnt) {
+  xtag.requestFrame(function () {
 
-  var offsetX = evnt.pageX - this.getBoundingClientRect().left,
-      deltaX = Math.round(sliderX - (offsetX - initialOffsetX) * -1.3),
-      direction = deltaX <= sliderX ? 'next' : 'prev',
-      triggerSlideChange = Math.abs(deltaX - sliderX) > (this.offsetWidth * DRAG_TRIGGER_AMOUNT);
+    var offsetX = evnt.pageX - this.getBoundingClientRect().left,
+        deltaX = Math.round(sliderX - (offsetX - initialOffsetX) * -1.3),
+        direction = deltaX <= sliderX ? 'next' : 'prev',
+        triggerSlideChange = Math.abs(deltaX - sliderX) > (this.offsetWidth * DRAG_TRIGGER_AMOUNT);
 
-  if ( triggerSlideChange ) {
-    this[direction]();
-    unBindDragging.call(this, false);
-    return;
-  }
+    if ( triggerSlideChange ) {
+      this[direction]();
+      unBindDragging.call(this, false);
+      return;
+    }
 
-  this.__slider.style.webkitTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
-  this.__slider.style.mozTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
-  this.__slider.style.transform = 'translateX(' + deltaX + 'px) translateZ(0)';
+    this.__slider.style.webkitTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
+    this.__slider.style.mozTransform = 'translateX(' + deltaX + 'px) translateZ(0)';
+    this.__slider.style.transform = 'translateX(' + deltaX + 'px) translateZ(0)';
 
+  }.bind(this));
 }
 
 /**
