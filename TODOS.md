@@ -1,6 +1,7 @@
 - [ ] build decent demo-page with code-examples and api-doc
 - [x] remove the nasty double-bullet-amount-bug
 - [x] enable dragging
+- [ ] fix dragging
 - [ ] namespace css-classes due to the absence of shadow DOM
 - [ ] ~~integrate type-switch for control (bullets|arrows)~~
 - [x] set arbitrary, fix max-width for `<image-card>`
