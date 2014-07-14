@@ -5,6 +5,8 @@ Image Card is a Custom Element for displaying a slideshow powered by [Mozilla X-
 
 ![image](http://i60.tinypic.com/140i1pc.jpg)
 
+**Note:** Dragging sucks at the moment. I'll fix this soon. Stay tuned!
+
 ## Installation
 
 Installation is simply done by using Bower:
