@@ -15,13 +15,12 @@ Installation is simply done by using Bower:
 $ bower install image-card --save
 ```
 
-After that include the X-Tag-Core-library, the PointerEvents-polyfill, the element's Javascript and the element's CSS into your page. That's it!
+After that include the X-Tag-Core-library, the element's Javascript and the element's CSS into your page. That's it!
 
 ```html
 …
 <head>
   <link rel="stylesheet" href="bower_components/image-card/dist/styles/image-card.css">
-  <script src="bower_components/pointerevents-polyfill/pointerevents.min.js"></script>
   <script src="bower_components/x-tag-core/dist/x-tag-core.js"></script>
   <script src="bower_components/image-card/dist/scripts/image-card.js"></script>
 </head>
