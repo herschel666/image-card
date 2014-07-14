@@ -68,6 +68,21 @@ var initialOffsetX = null;
 var sliderX = null;
 
 /**
+ * Distance between the left edge of the page
+ * and the ImageCard element.
+ * 
+ * @type {number}
+ */
+var clientLeft = null;
+
+/**
+ * Current width of the ImageCard element.
+ * 
+ * @type {number}
+ */
+var clientWidth = null;
+
+/**
  * The ImageCard's "body".
  *
  * @private
@@ -175,7 +190,7 @@ function wrapImages() {
       img.setAttribute('aria-labeledby', 'btn-' + this.__id + '-' + i);
     }
     slider.appendChild(img);
-    imgs[0].remove();
+    imgs[0].parentNode.removeChild(imgs[0]);
     i += 1;
   }
 
@@ -219,18 +234,20 @@ function cycle(cur, prev) {
  * @return {undefined}
  */
 function setSliderOffset(offset, duration) {
-  var duration = duration || DEFAULT_DURATION;
-  this.__slider.style.webkitTransitionDuration = duration + 's';
-  this.__slider.style.mozTransitionDuration = duration + 's';
-  this.__slider.style.transitionDuration = duration + 's';
-  this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.addEventListener(TRANSITION_END, function () {
-    this.__slider.style.webkitTransitionDuration = DEFAULT_DURATION + 's';
-    this.__slider.style.mozTransitionDuration = DEFAULT_DURATION + 's';
-    this.__slider.style.transitionDuration = DEFAULT_DURATION + 's';
-  }.bind(this), false);
+  xtag.requestFrame(function () {
+    var duration = duration || DEFAULT_DURATION;
+    this.__slider.style.webkitTransitionDuration = duration + 's';
+    this.__slider.style.mozTransitionDuration = duration + 's';
+    this.__slider.style.transitionDuration = duration + 's';
+    this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.addEventListener(TRANSITION_END, function () {
+      this.__slider.style.webkitTransitionDuration = DEFAULT_DURATION + 's';
+      this.__slider.style.mozTransitionDuration = DEFAULT_DURATION + 's';
+      this.__slider.style.transitionDuration = DEFAULT_DURATION + 's';
+    }.bind(this), false);
+  }.bind(this));
 }
 
 /**
@@ -257,10 +274,10 @@ function resetAriaHidden(cur) {
 function onDragging(evnt) {
   xtag.requestFrame(function () {
 
-    var offsetX = evnt.pageX - this.getBoundingClientRect().left,
+    var offsetX = evnt.pageX - clientLeft,
         deltaX = Math.round(sliderX - (offsetX - initialOffsetX) * -1.3),
         direction = deltaX <= sliderX ? 'next' : 'prev',
-        triggerSlideChange = Math.abs(deltaX - sliderX) > (this.offsetWidth * DRAG_TRIGGER_AMOUNT);
+        triggerSlideChange = Math.abs(deltaX - sliderX) > (clientWidth * DRAG_TRIGGER_AMOUNT);
 
     if ( triggerSlideChange ) {
       this[direction]();
@@ -290,6 +307,8 @@ function unBindDragging(evnt, slideToCurrent) {
 
   initialOffsetX = null;
   sliderX = null;
+  clientLeft = null;
+  clientWidth = null;
 
   // Already unbound everything
   if ( !bodyPointerUp ) {
@@ -416,7 +435,9 @@ imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
  */
 imageCardObj.events.pointerdown = function (evnt) {
 
-  initialOffsetX = evnt.pageX - this.getBoundingClientRect().left;
+  clientLeft = this.getBoundingClientRect().left;
+  clientWidth = this.offsetWidth;
+  initialOffsetX = evnt.pageX - clientLeft;
   sliderX = getTransforms(this.__slider).x;
   bodyPointerUp = xtag.addEvents(document.body, {
     'pointerup': unBindDragging.bind(this),

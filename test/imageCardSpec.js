@@ -33,7 +33,10 @@ describe('image-card', function () {
   afterEach(function () {
     elem.remove();
     elem2.remove();
-    bodyPointerUp = null; // why is this necessary? o_O
+    bodyPointerUp = null;
+    sliderX = null;
+    clientLeft = null;
+    clientWidth = null;
   });
 
   describe('basics', function () {
@@ -183,10 +186,16 @@ describe('image-card', function () {
 
     it('should bind and unbind pointermove-events', function () {
       expect(bodyPointerUp).toBe(null);
+      expect(clientLeft).toBe(null);
+      expect(clientWidth).toBe(null);
       xtag.fireEvent(elem, 'pointerdown');
       expect(bodyPointerUp).not.toBe(null);
+      expect(clientLeft).not.toBe(null);
+      expect(clientWidth).not.toBe(null);
       xtag.fireEvent(document.body, 'pointerup');
       expect(bodyPointerUp).toBe(null);
+      expect(clientLeft).toBe(null);
+      expect(clientWidth).toBe(null);
     });
 
     it('should set and destroy the initial offset', function () {
