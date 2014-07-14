@@ -1,5 +1,5 @@
 /**
- * image-card - 0.3.2
+ * image-card - 0.3.3
  *
  * A Custom Element for an Image Card
  *
@@ -83,6 +83,21 @@ var initialOffsetX = null;
  * @type {number}
  */
 var sliderX = null;
+
+/**
+ * Distance between the left edge of the page
+ * and the ImageCard element.
+ * 
+ * @type {number}
+ */
+var clientLeft = null;
+
+/**
+ * Current width of the ImageCard element.
+ * 
+ * @type {number}
+ */
+var clientWidth = null;
 
 /**
  * The ImageCard's "body".
@@ -192,7 +207,7 @@ function wrapImages() {
       img.setAttribute('aria-labeledby', 'btn-' + this.__id + '-' + i);
     }
     slider.appendChild(img);
-    imgs[0].remove();
+    imgs[0].parentNode.removeChild(imgs[0]);
     i += 1;
   }
 
@@ -236,18 +251,20 @@ function cycle(cur, prev) {
  * @return {undefined}
  */
 function setSliderOffset(offset, duration) {
-  var duration = duration || DEFAULT_DURATION;
-  this.__slider.style.webkitTransitionDuration = duration + 's';
-  this.__slider.style.mozTransitionDuration = duration + 's';
-  this.__slider.style.transitionDuration = duration + 's';
-  this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
-  this.__slider.addEventListener(TRANSITION_END, function () {
-    this.__slider.style.webkitTransitionDuration = DEFAULT_DURATION + 's';
-    this.__slider.style.mozTransitionDuration = DEFAULT_DURATION + 's';
-    this.__slider.style.transitionDuration = DEFAULT_DURATION + 's';
-  }.bind(this), false);
+  xtag.requestFrame(function () {
+    var duration = duration || DEFAULT_DURATION;
+    this.__slider.style.webkitTransitionDuration = duration + 's';
+    this.__slider.style.mozTransitionDuration = duration + 's';
+    this.__slider.style.transitionDuration = duration + 's';
+    this.__slider.style.webkitTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.style.mozTransform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.style.transform = 'translateX(-' + offset + 'px) translateZ(0)';
+    this.__slider.addEventListener(TRANSITION_END, function () {
+      this.__slider.style.webkitTransitionDuration = DEFAULT_DURATION + 's';
+      this.__slider.style.mozTransitionDuration = DEFAULT_DURATION + 's';
+      this.__slider.style.transitionDuration = DEFAULT_DURATION + 's';
+    }.bind(this), false);
+  }.bind(this));
 }
 
 /**
@@ -274,10 +291,10 @@ function resetAriaHidden(cur) {
 function onDragging(evnt) {
   xtag.requestFrame(function () {
 
-    var offsetX = evnt.pageX - this.getBoundingClientRect().left,
+    var offsetX = evnt.pageX - clientLeft,
         deltaX = Math.round(sliderX - (offsetX - initialOffsetX) * -1.3),
         direction = deltaX <= sliderX ? 'next' : 'prev',
-        triggerSlideChange = Math.abs(deltaX - sliderX) > (this.offsetWidth * DRAG_TRIGGER_AMOUNT);
+        triggerSlideChange = Math.abs(deltaX - sliderX) > (clientWidth * DRAG_TRIGGER_AMOUNT);
 
     if ( triggerSlideChange ) {
       this[direction]();
@@ -307,13 +324,15 @@ function unBindDragging(evnt, slideToCurrent) {
 
   initialOffsetX = null;
   sliderX = null;
+  clientLeft = null;
+  clientWidth = null;
 
   // Already unbound everything
   if ( !bodyPointerUp ) {
     return;
   }
 
-  xtag.removeEvents(document.body, bodyPointerUp);
+  xtag.removeEvent(document.body, bodyPointerUp);
   bodyPointerUp = null;
   xtag.removeEvent(this, dragEvent);
   dragEvent = null;
@@ -426,20 +445,19 @@ imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
 
 /**
  * Binds the relevant events for dragging functionality
- * on `pointerdown`.
+ * on `mousedown`.
  *
  * @param  {object}    evnt The event-object
  * @return {undefined}
  */
-imageCardObj.events.pointerdown = function (evnt) {
+imageCardObj.events.mousedown = function (evnt) {
 
-  initialOffsetX = evnt.pageX - this.getBoundingClientRect().left;
+  clientLeft = this.getBoundingClientRect().left;
+  clientWidth = this.offsetWidth;
+  initialOffsetX = evnt.pageX - clientLeft;
   sliderX = getTransforms(this.__slider).x;
-  bodyPointerUp = xtag.addEvents(document.body, {
-    'pointerup': unBindDragging.bind(this),
-    'pointercancel': unBindDragging.bind(this)
-  });
-  dragEvent = xtag.addEvent(this, 'pointermove', onDragging.bind(this));
+  bodyPointerUp = xtag.addEvent(document.body, 'mouseup', unBindDragging.bind(this));
+  dragEvent = xtag.addEvent(this, 'mousemove', onDragging.bind(this));
 
 };
 
@@ -551,7 +569,7 @@ cardControlObj.lifecycle.created = function ccCreated() {
   btns = '';
 
   xtag.addEvent(parent, 'change', onChange.bind(this));
-  xtag.addEvent(this, 'pointerdown:delegate(button)', onClick.bind(this));
+  xtag.addEvent(this, 'click:delegate(button)', onClick.bind(this));
 
   each(parent.images, function (img, i) {
     var j = i + 1,

@@ -1,5 +1,5 @@
 /**
- * image-card - 0.3.2
+ * image-card - 0.3.3
  *
  * A Custom Element for an Image Card
  *
@@ -16,6 +16,7 @@ image-card {
   max-width: 300px;
   position: relative;
   display: block;
+  overflow: hidden;
   }
 
 image-card[data-card-control] {
@@ -73,6 +74,7 @@ card-control {
   left: 0;
   display: block;
   text-align: center;
+  overflow: hidden;
   }
 
 card-control .btn {
