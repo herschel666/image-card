@@ -184,15 +184,15 @@ describe('image-card', function () {
 
   describe('dragging-support', function () {
 
-    it('should bind and unbind pointermove-events', function () {
+    it('should bind and unbind mousemove-events', function () {
       expect(bodyPointerUp).toBe(null);
       expect(clientLeft).toBe(null);
       expect(clientWidth).toBe(null);
-      xtag.fireEvent(elem, 'pointerdown');
+      xtag.fireEvent(elem, 'mousedown');
       expect(bodyPointerUp).not.toBe(null);
       expect(clientLeft).not.toBe(null);
       expect(clientWidth).not.toBe(null);
-      xtag.fireEvent(document.body, 'pointerup');
+      xtag.fireEvent(document.body, 'mouseup');
       expect(bodyPointerUp).toBe(null);
       expect(clientLeft).toBe(null);
       expect(clientWidth).toBe(null);
@@ -200,28 +200,28 @@ describe('image-card', function () {
 
     it('should set and destroy the initial offset', function () {
       expect(initialOffsetX).toBe(null);
-      customEvnt(elem, 'pointerdown', {pageX: 10 + elem.getBoundingClientRect().left});
+      customEvnt(elem, 'mousedown', {pageX: 10 + elem.getBoundingClientRect().left});
       expect(initialOffsetX).toBeDefined();
       expect(initialOffsetX).toBe(10);
-      xtag.fireEvent(document.body, 'pointerup');
+      xtag.fireEvent(document.body, 'mouseup');
       expect(initialOffsetX).toBe(null);
     });
 
     it('should set and destroy the sliderX', function () {
       expect(sliderX).toBe(null);
-      xtag.fireEvent(elem, 'pointerdown');
+      xtag.fireEvent(elem, 'mousedown');
       expect(sliderX).toBeDefined();
-      xtag.fireEvent(document.body, 'pointerup');
+      xtag.fireEvent(document.body, 'mouseup');
       expect(sliderX).toBe(null);
     });
 
     it('should drag the images', function () {
       spyOn(window, 'onDragging').andCallThrough();
-      customEvnt(elem, 'pointerdown', {pageX: 10 + elem.getBoundingClientRect().left});
+      customEvnt(elem, 'mousedown', {pageX: 10 + elem.getBoundingClientRect().left});
       expect(sliderX).not.toBe(null);
-      customEvnt(elem, 'pointermove', {pageX: 20 + elem.getBoundingClientRect().left});
+      customEvnt(elem, 'mousemove', {pageX: 20 + elem.getBoundingClientRect().left});
       expect(window.onDragging).toHaveBeenCalled();
-      xtag.fireEvent(elem, 'pointerup');
+      xtag.fireEvent(elem, 'mouseup');
       expect(sliderX).toBe(null);
     });
 

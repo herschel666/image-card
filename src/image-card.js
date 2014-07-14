@@ -315,7 +315,7 @@ function unBindDragging(evnt, slideToCurrent) {
     return;
   }
 
-  xtag.removeEvents(document.body, bodyPointerUp);
+  xtag.removeEvent(document.body, bodyPointerUp);
   bodyPointerUp = null;
   xtag.removeEvent(this, dragEvent);
   dragEvent = null;
@@ -428,22 +428,19 @@ imageCardObj.events['dragstart:delegate(img)'] = function (evnt) {
 
 /**
  * Binds the relevant events for dragging functionality
- * on `pointerdown`.
+ * on `mousedown`.
  *
  * @param  {object}    evnt The event-object
  * @return {undefined}
  */
-imageCardObj.events.pointerdown = function (evnt) {
+imageCardObj.events.mousedown = function (evnt) {
 
   clientLeft = this.getBoundingClientRect().left;
   clientWidth = this.offsetWidth;
   initialOffsetX = evnt.pageX - clientLeft;
   sliderX = getTransforms(this.__slider).x;
-  bodyPointerUp = xtag.addEvents(document.body, {
-    'pointerup': unBindDragging.bind(this),
-    'pointercancel': unBindDragging.bind(this)
-  });
-  dragEvent = xtag.addEvent(this, 'pointermove', onDragging.bind(this));
+  bodyPointerUp = xtag.addEvent(document.body, 'mouseup', unBindDragging.bind(this));
+  dragEvent = xtag.addEvent(this, 'mousemove', onDragging.bind(this));
 
 };
 
@@ -555,7 +552,7 @@ cardControlObj.lifecycle.created = function ccCreated() {
   btns = '';
 
   xtag.addEvent(parent, 'change', onChange.bind(this));
-  xtag.addEvent(this, 'pointerdown:delegate(button)', onClick.bind(this));
+  xtag.addEvent(this, 'click:delegate(button)', onClick.bind(this));
 
   each(parent.images, function (img, i) {
     var j = i + 1,

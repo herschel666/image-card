@@ -29,7 +29,6 @@
     "karma.conf.js"
   ],
   "dependencies": {
-    "x-tag-core": "~0.9.7",
-    "pointerevents-polyfill": "~0.2.0"
+    "x-tag-core": "~0.9.7"
   }
 }
