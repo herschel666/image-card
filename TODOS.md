@@ -8,6 +8,7 @@
 - [x] enhance accessability
 - [x] js-api documentation
 - [ ] set up `controls` as attribute rather than as an element itself
+- [ ] `aria-pressed`-attributes to bullets
 - [x] set up a release-task in Grunt
 - [x] create xtag.json-file
 - [x] publish to Bower
